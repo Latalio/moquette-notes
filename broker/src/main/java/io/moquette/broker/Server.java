@@ -252,6 +252,7 @@ public class Server {
 
         List<InterceptHandler> observers = new ArrayList<>(embeddedObservers);
         String interceptorClassName = props.getProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_NAME);
+        // 加载interceptor handler
         if (interceptorClassName != null && !interceptorClassName.isEmpty()) {
             InterceptHandler handler = loadClass(interceptorClassName, InterceptHandler.class,
                                                  io.moquette.broker.Server.class, this);
@@ -259,6 +260,7 @@ public class Server {
                 observers.add(handler);
             }
         }
+
         interceptor = new BrokerInterceptor(props, observers);
     }
 

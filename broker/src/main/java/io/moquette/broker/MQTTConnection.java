@@ -130,19 +130,23 @@ final class MQTTConnection {
         final String username = payload.userName();
         LOG.trace("Processing CONNECT message. CId={} username: {} channel: {}", clientId, username, channel);
 
+        // 检查协议版本
         if (isNotProtocolVersion(msg, MqttVersion.MQTT_3_1) && isNotProtocolVersion(msg, MqttVersion.MQTT_3_1_1)) {
             LOG.warn("MQTT protocol version is not valid. CId={} channel: {}", clientId, channel);
             abortConnection(CONNECTION_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION);
             return;
         }
+
+        // 检查cleanSession标识
         final boolean cleanSession = msg.variableHeader().isCleanSession();
         if (clientId == null || clientId.length() == 0) {
+            // 检查broker设置，是否允许clientId为null或空
             if (!brokerConfig.isAllowZeroByteClientId()) {
                 LOG.info("Broker doesn't permit MQTT empty client ID. Username: {}, channel: {}", username, channel);
                 abortConnection(CONNECTION_REFUSED_IDENTIFIER_REJECTED);
                 return;
             }
-
+            // clientId为null或空时，不允许建立长会话，cleanSession必须为true
             if (!cleanSession) {
                 LOG.info("MQTT client ID cannot be empty for persistent session. Username: {}, channel: {}",
                          username, channel);
@@ -150,12 +154,13 @@ final class MQTTConnection {
                 return;
             }
 
-            // Generating client id.
+            // 随机生成clientId
             clientId = UUID.randomUUID().toString().replace("-", "");
             LOG.debug("Client has connected with integration generated id: {}, username: {}, channel: {}", clientId,
                       username, channel);
         }
 
+        // 登录
         if (!login(msg, clientId)) {
             abortConnection(CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD);
             channel.close().addListener(CLOSE_ON_FAILURE);

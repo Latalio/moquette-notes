@@ -46,9 +46,11 @@ public final class BrokerInterceptor implements Interceptor {
     private BrokerInterceptor(int poolSize, List<InterceptHandler> handlers) {
         LOG.info("Initializing broker interceptor. InterceptorIds={}", getInterceptorIds(handlers));
         this.handlers = new HashMap<>();
+        //
         for (Class<?> messageType : InterceptHandler.ALL_MESSAGE_TYPES) {
             this.handlers.put(messageType, new CopyOnWriteArrayList<InterceptHandler>());
         }
+        //
         for (InterceptHandler handler : handlers) {
             this.addInterceptHandler(handler);
         }
@@ -172,6 +174,7 @@ public final class BrokerInterceptor implements Interceptor {
         Class<?>[] interceptedMessageTypes = getInterceptedMessageTypes(interceptHandler);
         LOG.info("Adding MQTT message interceptor. InterceptorId={}, handledMessageTypes={}",
             interceptHandler.getID(), interceptedMessageTypes);
+        // 对每一种消息类型，往其handler列表中添加handler
         for (Class<?> interceptMessageType : interceptedMessageTypes) {
             this.handlers.get(interceptMessageType).add(interceptHandler);
         }
@@ -182,6 +185,7 @@ public final class BrokerInterceptor implements Interceptor {
         Class<?>[] interceptedMessageTypes = getInterceptedMessageTypes(interceptHandler);
         LOG.info("Removing MQTT message interceptor. InterceptorId={}, handledMessageTypes={}",
             interceptHandler.getID(), interceptedMessageTypes);
+        // 对每一种消息类型，在其handler列表中移除handler
         for (Class<?> interceptMessageType : interceptedMessageTypes) {
             this.handlers.get(interceptMessageType).remove(interceptHandler);
         }

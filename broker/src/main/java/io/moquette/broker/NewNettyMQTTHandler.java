@@ -36,16 +36,19 @@ public class NewNettyMQTTHandler extends ChannelInboundHandlerAdapter {
     private static final String ATTR_CONNECTION = "connection";
     private static final AttributeKey<Object> ATTR_KEY_CONNECTION = AttributeKey.valueOf(ATTR_CONNECTION);
 
+    // 私有数据： 连接工厂
     private MQTTConnectionFactory connectionFactory;
 
     NewNettyMQTTHandler(MQTTConnectionFactory connectionFactory) {
         this.connectionFactory = connectionFactory;
     }
 
+    // 设置channel的连接为connection
     private static void mqttConnection(Channel channel, MQTTConnection connection) {
         channel.attr(ATTR_KEY_CONNECTION).set(connection);
     }
 
+    // 获取channel的connection
     private static MQTTConnection mqttConnection(Channel channel) {
         return (MQTTConnection) channel.attr(ATTR_KEY_CONNECTION).get();
     }
